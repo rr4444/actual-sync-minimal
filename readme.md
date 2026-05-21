@@ -1,6 +1,19 @@
-# Actual Sync
+# Actual Sync (Minimal Fork)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+> [!IMPORTANT]
+> **IaC & Self-Alignment Architecture**
+> This repository is a specialized fork of `andrewinci/actual-sync` designed to maximize **Infrastructure as Code (IaC) idempotency**, deployment maintainability, and container self-healing.
+> 
+> In traditional containerized deployments, aligning a client API library with the server version requires host-side scripting, build-time overrides, or manual recompilations. This creates fragile, platform-dependent builds that violate declarative IaC principles.
+> 
+> To enforce absolute deployment idempotency, this fork shifts the version alignment from build-time to **runtime**. The container dynamically boots, self-inspects, and upgrades its `@actual-app/api` library to match the target Actual Budget server on the fly—driven declaratively by environment variables or configuration files. This results in:
+> * **Zero Build Hacks:** No more `sed` regex patches or custom shell wrapper scripts in your deployment playbooks.
+> * **Platform Agnosticism:** Standardized Docker builds that run identically on Kubernetes (K3s), bare metal, or raw Docker.
+> * **Declarative Upgrades:** Upgrading your Actual server automatically triggers a dynamic library alignment in the sync container upon its next scheduled run.
+
+---
 
 A minimal command-line tool that automatically syncs bank transactions from various financial providers directly into [Actual Budget](https://actualbudget.org/).
 
