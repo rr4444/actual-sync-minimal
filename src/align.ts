@@ -31,9 +31,18 @@ export const alignApiDependency = async (config: AppConfig): Promise<void> => {
     );
     console.log(chalk.blue(`🔄 Programmatically aligning @actual-app/api to version ${targetVersion}...`));
 
+    // Detect if we should use pnpm or npm
+    let installCmd = `npm install --no-save @actual-app/api@${targetVersion}`;
+    
+    // Check if we are running in a pnpm environment (pnpm-lock.yaml exists)
+    const hasPnpmLock = fs.existsSync(path.join(process.cwd(), "pnpm-lock.yaml"));
+    if (hasPnpmLock) {
+      installCmd = `pnpm add --save-false @actual-app/api@${targetVersion}`;
+    }
+
     try {
-      // Runs npm install --no-save to dynamically align the runtime dependencies
-      execSync(`npm install --no-save @actual-app/api@${targetVersion}`, {
+      console.log(chalk.gray(`Running command: ${installCmd}`));
+      execSync(installCmd, {
         stdio: "inherit",
         env: { ...process.env, NODE_ENV: "production" },
       });
