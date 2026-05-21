@@ -6,6 +6,7 @@ export type ActualConfig = {
   password: string;
   url: string;
   cacheDir: string;
+  apiVersion?: string;
 };
 
 export type ActualTransaction = {

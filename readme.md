@@ -12,6 +12,39 @@ A minimal command-line tool that automatically syncs bank transactions from vari
 - 🔔 **Notifications** - Optional ntfy integration for sync status notifications
 - 🐋 **Docker Ready** - Easy deployment and containerization
 
+## 🔄 Dynamic Runtime API Alignment
+
+To ensure compatibility with your self-hosted [Actual Budget](https://actualbudget.org/) server without lagging behind or suffering from out-of-sync database migrations, this fork features an **automatic runtime self-updater**.
+
+Instead of hardcoding a static version of `@actual-app/api` during image build time, the application programmatically aligns its dependencies **on the fly at startup** to match your server's API version. This guarantees the client remains perfectly up-to-date with your Actual server without requiring you to manually rebuild Docker images or patch package files.
+
+### How it works
+On startup, the application checks for a target version via two pathways:
+1. **Environment Variable:** `ACTUAL_API_VERSION` (Recommended for containerized environments like Kubernetes).
+2. **Configuration File:** `actual.apiVersion` property inside your `.config.yml` (Recommended for bare-metal or standard Docker).
+
+If the currently installed library version in `node_modules` does not match the target version, the application programmatically downloads and installs the matching `@actual-app/api` version from the npm registry instantly (taking only ~3 seconds) before running the sync command.
+
+### Configuration
+
+#### Option A: Via Environment Variable (Docker/Kubernetes)
+Pass the target version directly as an environment variable in your container specification:
+```yaml
+env:
+  - name: ACTUAL_API_VERSION
+    value: "26.4.0" # Match your Actual server version
+```
+
+#### Option B: Via Configuration File (`.config.yml`)
+Add the `apiVersion` property under the `actual` section of your configuration file:
+```yaml
+actual:
+  password: "your-actual-password"
+  syncId: "your-sync-id"
+  url: "https://your-actual-server.com"
+  apiVersion: "26.4.0" # Match your Actual server version
+```
+
 ## 🏦 Supported Providers
 
 - **[TrueLayer](https://truelayer.com/)** - Connect to 300+ banks across UK and Europe

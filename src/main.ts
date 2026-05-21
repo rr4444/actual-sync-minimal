@@ -5,9 +5,6 @@ import chalk from "chalk";
 import inquirer from "inquirer";
 import * as YAML from "yaml";
 import { loadConfig, createConfig } from "./config";
-import { openActualSession } from "./actual";
-import { Truelayer } from "./truelayer";
-import { Sync } from "./sync";
 
 program.version("1.0.0").description("Actual sync");
 
@@ -31,6 +28,10 @@ program
 const actualCommand = program.command("actual");
 actualCommand.command("list-accounts").action(async () => {
   const config = await loadConfig();
+  const { alignApiDependency } = await import("./align");
+  await alignApiDependency(config);
+
+  const { openActualSession } = await import("./actual");
   const actual = await openActualSession(config.actual);
   try {
     const accounts = await actual.listAccounts();
@@ -44,6 +45,7 @@ actualCommand.command("list-accounts").action(async () => {
 const truelayerCommand = program.command("truelayer");
 truelayerCommand.command("add-account").action(async () => {
   const config = await loadConfig();
+  const { Truelayer } = await import("./truelayer");
   const truelayer = Truelayer(config.truelayer);
   const accounts = await truelayer.addAccounts();
   console.log(
@@ -53,6 +55,7 @@ truelayerCommand.command("add-account").action(async () => {
 });
 truelayerCommand.command("list-accounts").action(async () => {
   const config = await loadConfig();
+  const { Truelayer } = await import("./truelayer");
   const truelayer = Truelayer(config.truelayer);
   console.log(YAML.stringify(truelayer.listAccounts(), null, 2));
 });
@@ -63,6 +66,7 @@ truelayerCommand
     const config = await loadConfig();
     const account = config.truelayer.accounts.find((a) => a.id === accountId);
     if (account) {
+      const { Truelayer } = await import("./truelayer");
       const truelayer = Truelayer(config.truelayer);
       const transactions = await truelayer.getTransactions(account);
       console.log(YAML.stringify(transactions, null, 2));
@@ -82,6 +86,7 @@ truelayerCommand
     const config = await loadConfig();
     const account = config.truelayer.accounts.find((a) => a.id === accountId);
     if (account) {
+      const { Truelayer } = await import("./truelayer");
       const truelayer = Truelayer(config.truelayer);
       const balance = await truelayer.getBalance(account);
       console.log(JSON.stringify(balance, null, 2));
@@ -96,7 +101,11 @@ truelayerCommand
 
 program.command("sync").action(async () => {
   const config = await loadConfig();
+  const { alignApiDependency } = await import("./align");
+  await alignApiDependency(config);
+
   try {
+    const { Sync } = await import("./sync");
     await Sync(config).sync();
   } catch (error) {
     console.error(chalk.red("❌ Sync failed:"), error);
