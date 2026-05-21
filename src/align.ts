@@ -37,7 +37,8 @@ export const alignApiDependency = async (config: AppConfig): Promise<void> => {
     // Check if we are running in a pnpm environment (pnpm-lock.yaml exists)
     const hasPnpmLock = fs.existsSync(path.join(process.cwd(), "pnpm-lock.yaml"));
     if (hasPnpmLock) {
-      installCmd = `pnpm add --save-false @actual-app/api@${targetVersion}`;
+      // Ephemeral container filesystems render saving to package.json moot, so plain 'add' is robust and correct
+      installCmd = `pnpm add @actual-app/api@${targetVersion}`;
     }
 
     try {
