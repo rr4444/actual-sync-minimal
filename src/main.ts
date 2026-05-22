@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 
+// Polyfill global.navigator to prevent upstream @actual-app/api >=26.3.0 from crashing in Node.js
+if (typeof (global as any).navigator === "undefined") {
+  (global as any).navigator = { userAgent: "Node" };
+}
+
 import { program } from "commander";
 import chalk from "chalk";
 import inquirer from "inquirer";
