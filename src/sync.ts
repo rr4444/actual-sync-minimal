@@ -777,7 +777,6 @@ export const Sync = (config: AppConfig) => {
       };
 
       // Write dashboard outputs to disk
-      const dashboardDir = process.env.DASHBOARD_DATA_DIR || "/app/data";
       try {
         if (!fs.existsSync(dashboardDir)) {
           fs.mkdirSync(dashboardDir, { recursive: true });
