@@ -58,6 +58,10 @@ const generateHtmlDashboard = (data: any): string => {
               <span class="detail-val val-updated">${acc.updated}</span>
             </div>
             <div class="detail-item">
+              <span class="detail-label">Preview</span>
+              <span class="detail-val ${acc.updatedPreview > 0 ? "val-preview" : "val-zero"}">${acc.updatedPreview}</span>
+            </div>
+            <div class="detail-item">
               <span class="detail-label">Errors</span>
               <span class="detail-val ${acc.errors > 0 ? "val-error" : "val-zero"}">${acc.errors}</span>
             </div>
@@ -271,7 +275,7 @@ const generateHtmlDashboard = (data: any): string => {
     }
     .sync-details {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       text-align: center;
       gap: 0.5rem;
     }
@@ -296,6 +300,9 @@ const generateHtmlDashboard = (data: any): string => {
     }
     .val-updated {
       color: var(--accent-primary);
+    }
+    .val-preview {
+      color: #a855f7;
     }
     .val-zero {
       color: var(--text-muted);
