@@ -63,6 +63,47 @@ actual:
 - **[TrueLayer](https://truelayer.com/)** - Connect to 300+ banks across UK and Europe
 - **Trading 212** - _Coming soon_
 
+## 📊 Monitoring Dashboard
+
+This fork features a built-in, premium **visual observability dashboard** that generates dynamic monitoring assets automatically at the conclusion of every sync cycle.
+
+### Key Features
+* **Real-Time Alignment Status:** Displays bank-specific online balances in comparison with your local Actual Budget ledger balances.
+* **Persistent Sync History:** Maintains a rolling history of the **last 20 sync execution runs** (capturing exact timestamps, balances, and counts of Added, Updated, Preview/Staged, and Error items) saved completely offline inside a persistent volume.
+* **Chronological History Drawer:** A gorgeous, responsive, glassmorphic slide-out panel accessible by clicking any bank card, color-coded to instantly highlight ledger/bank alignment (`🟢 Match` / `🔴 Mismatch`).
+* **Zero Host Dependencies:** Rendered static and served by a lightweight Nginx sidecar mounted to a shared PVC.
+
+### How it works
+At the end of a sync cycle, `actual-sync` outputs:
+1. `sync-summary.json`: The raw structured monitoring state (including rolling historical execution records).
+2. `index.html`: A premium visual single-page application dashboard featuring HSL tailored colors, dark-mode styling, glassmorphism, responsive alignment, and interactive keyboard/overlay panel control.
+
+### Serving the Dashboard 24/7 (Kubernetes/Docker)
+To serve the dashboard continuously even when the sync CronJob is idle, run a lightweight Nginx container sharing a `PersistentVolumeClaim` with your sync executor:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: actual-sync-dashboard
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        volumeMounts:
+        - name: dashboard-data
+          mountPath: /usr/share/nginx/html/actual-sync-minimal
+      volumes:
+      - name: dashboard-data
+        persistentVolumeClaim:
+          claimName: actual-sync-dashboard-pvc
+```
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
