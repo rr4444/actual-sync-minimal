@@ -525,7 +525,7 @@ const generateHtmlDashboard = (data: any): string => {
   </div>
 
   <footer>
-    Powered by Antigravity &bull; Sleek self-healing runtime architecture &bull; <a href="/actual-sync-minimal/data/sync-summary.json" target="_blank">View raw JSON</a>
+    <a href="https://github.com/rr4444/actual-sync-minimal" target="_blank">actual-sync-minimal</a> &bull; <a href="/actual-sync-minimal/data/sync-summary.json" target="_blank">View raw JSON</a>
   </footer>
 
   <script>
