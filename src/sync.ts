@@ -21,7 +21,7 @@ export type SyncConfig = {
 };
 
 const generateHtmlDashboard = (data: any): string => {
-  const accountsHtml = data.accounts.map((acc: any) => {
+  const accountsHtml = data.accounts.map((acc: any, index: number) => {
     const matchStatus = acc.balances.match
       ? `<span class="badge badge-success">Match</span>`
       : `<span class="badge badge-warning">Mismatch</span>`;
@@ -32,7 +32,7 @@ const generateHtmlDashboard = (data: any): string => {
       : `<div class="diff-amount">Difference: ${acc.balances.currency} ${balanceDiff.toFixed(2)}</div>`;
 
     return `
-      <div class="card account-card">
+      <div class="card account-card" onclick="showTransactions(${index})">
         <div class="account-header">
           <h3 class="account-name">${acc.name}</h3>
           ${matchStatus}
@@ -310,6 +310,149 @@ const generateHtmlDashboard = (data: any): string => {
     .val-error {
       color: var(--accent-error);
     }
+    /* Clickable accounts styling */
+    .account-card {
+      cursor: pointer;
+      position: relative;
+    }
+    .account-card::after {
+      content: "Click to view recent transactions";
+      position: absolute;
+      bottom: 0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .account-card:hover::after {
+      opacity: 0.8;
+    }
+    /* Transaction Drawer Styles */
+    .drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .drawer-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .transaction-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 100%;
+      max-width: 500px;
+      height: 100vh;
+      background: rgba(8, 12, 20, 0.95);
+      backdrop-filter: blur(25px);
+      border-left: 1px solid var(--card-border);
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+    }
+    .transaction-drawer.open {
+      transform: translateX(0);
+    }
+    .drawer-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .drawer-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f3f4f6 30%, #9ca3af 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .close-btn {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-primary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .drawer-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+    }
+    .tx-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .tx-table th, .tx-table td {
+      padding: 0.75rem 0.5rem;
+      text-align: left;
+    }
+    .tx-table th {
+      border-bottom: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    .tx-table tr {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+    .tx-date {
+      color: var(--text-secondary);
+      white-space: nowrap;
+      font-family: 'Outfit', sans-serif;
+    }
+    .tx-payee {
+      font-weight: 500;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .tx-amount {
+      text-align: right;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+    }
+    .tx-credit {
+      color: var(--accent-success);
+    }
+    .tx-debit {
+      color: var(--text-primary);
+    }
+    .no-tx {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 2rem 0;
+    }
     footer {
       text-align: center;
       margin-top: auto;
@@ -358,9 +501,78 @@ const generateHtmlDashboard = (data: any): string => {
       ${accountsHtml}
     </div>
   </div>
+
+  <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+  <div class="transaction-drawer" id="transaction-drawer">
+    <div class="drawer-header">
+      <h2 class="drawer-title" id="drawer-title">Recent Transactions</h2>
+      <button class="close-btn" onclick="closeDrawer()">&times;</button>
+    </div>
+    <div class="drawer-content">
+      <table class="tx-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Payee</th>
+            <th style="text-align: right;">Amount</th>
+          </tr>
+        </thead>
+        <tbody id="drawer-table-body">
+          <!-- Dynamic transaction rows inserted here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <footer>
     Powered by Antigravity &bull; Sleek self-healing runtime architecture &bull; <a href="/actual-sync-minimal/data/sync-summary.json" target="_blank">View raw JSON</a>
   </footer>
+
+  <script>
+    const accountsData = ${JSON.stringify(data.accounts)};
+    
+    function showTransactions(accountIndex) {
+      const account = accountsData[accountIndex];
+      if (!account) return;
+      
+      const drawer = document.getElementById('transaction-drawer');
+      const drawerTitle = document.getElementById('drawer-title');
+      const tableBody = document.getElementById('drawer-table-body');
+      
+      drawerTitle.innerText = account.name + ' - Recent Transactions';
+      
+      if (!account.lastTransactions || account.lastTransactions.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="3" class="no-tx">No recent transactions synced.</td></tr>';
+      } else {
+        tableBody.innerHTML = account.lastTransactions.map(tx => {
+          const amtColor = tx.amount >= 0 ? 'tx-credit' : 'tx-debit';
+          const formattedAmt = (tx.amount >= 0 ? '+' : '') + tx.amount.toFixed(2);
+          return `
+            <tr>
+              <td class="tx-date">\${tx.date}</td>
+              <td class="tx-payee" title="\${tx.payee || tx.notes || ''}">\${tx.payee || tx.notes || 'Unknown'}</td>
+              <td class="tx-amount \${amtColor}">\${account.balances.currency} \${formattedAmt}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+      
+      drawer.classList.add('open');
+      document.getElementById('drawer-overlay').classList.add('open');
+    }
+
+    function closeDrawer() {
+      document.getElementById('transaction-drawer').classList.remove('open');
+      document.getElementById('drawer-overlay').classList.remove('open');
+    }
+
+    // Keyboard support (Escape key to close drawer)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeDrawer();
+      }
+    });
+  </script>
 </body>
 </html>`;
 };
@@ -466,6 +678,10 @@ export const Sync = (config: AppConfig) => {
         
         const isMatch = truelayerBalance?.current === (actualBalance / 100) * sign;
         
+        const sortedTx = [...actualTransactions]
+          .sort((a, b) => b.date.localeCompare(a.date))
+          .slice(0, 20);
+
         dashboardData.accounts.push({
           name: syncConfig.name,
           truelayerAccountId: syncConfig.truelayerAccountId,
@@ -479,7 +695,13 @@ export const Sync = (config: AppConfig) => {
             actual: (actualBalance / 100) * sign,
             match: isMatch,
             currency: truelayerBalance?.currency || "GBP",
-          }
+          },
+          lastTransactions: sortedTx.map(t => ({
+            date: t.date,
+            payee: t.payee_name,
+            amount: t.amount / 100,
+            notes: t.notes
+          }))
         });
 
         if (isMatch)
