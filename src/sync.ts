@@ -547,13 +547,13 @@ const generateHtmlDashboard = (data: any): string => {
         tableBody.innerHTML = account.lastTransactions.map(tx => {
           const amtColor = tx.amount >= 0 ? 'tx-credit' : 'tx-debit';
           const formattedAmt = (tx.amount >= 0 ? '+' : '') + tx.amount.toFixed(2);
-          return `
+          return \`
             <tr>
               <td class="tx-date">\${tx.date}</td>
               <td class="tx-payee" title="\${tx.payee || tx.notes || ''}">\${tx.payee || tx.notes || 'Unknown'}</td>
               <td class="tx-amount \${amtColor}">\${account.balances.currency} \${formattedAmt}</td>
             </tr>
-          `;
+          \`;
         }).join('');
       }
       
