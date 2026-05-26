@@ -432,10 +432,17 @@ const generateHtmlDashboard = (data: any): string => {
     }
     .tx-payee {
       font-weight: 500;
-      max-width: 180px;
+      max-width: 200px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+    .match-ok {
+      color: var(--text-primary);
+    }
+    .match-mismatch {
+      color: var(--accent-warning);
+      font-weight: 600;
     }
     .tx-amount {
       text-align: right;
@@ -445,8 +452,18 @@ const generateHtmlDashboard = (data: any): string => {
     .tx-credit {
       color: var(--accent-success);
     }
-    .tx-debit {
-      color: var(--text-primary);
+    .tx-updated {
+      color: var(--accent-primary);
+    }
+    .tx-preview {
+      color: #a855f7;
+    }
+    .tx-error {
+      color: var(--accent-error);
+      font-weight: 600;
+    }
+    .tx-zero {
+      color: var(--text-muted);
     }
     .no-tx {
       text-align: center;
@@ -505,20 +522,23 @@ const generateHtmlDashboard = (data: any): string => {
   <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
   <div class="transaction-drawer" id="transaction-drawer">
     <div class="drawer-header">
-      <h2 class="drawer-title" id="drawer-title">Recent Transactions</h2>
+      <h2 class="drawer-title" id="drawer-title">Sync History</h2>
       <button class="close-btn" onclick="closeDrawer()">&times;</button>
     </div>
     <div class="drawer-content">
       <table class="tx-table">
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Payee</th>
-            <th style="text-align: right;">Amount</th>
+            <th>Time</th>
+            <th>Online / Actual</th>
+            <th style="text-align: right;">Add</th>
+            <th style="text-align: right;">Upd</th>
+            <th style="text-align: right;">Prv</th>
+            <th style="text-align: right;">Err</th>
           </tr>
         </thead>
         <tbody id="drawer-table-body">
-          <!-- Dynamic transaction rows inserted here -->
+          <!-- Dynamic sync history rows inserted here -->
         </tbody>
       </table>
     </div>
@@ -539,19 +559,27 @@ const generateHtmlDashboard = (data: any): string => {
       const drawerTitle = document.getElementById('drawer-title');
       const tableBody = document.getElementById('drawer-table-body');
       
-      drawerTitle.innerText = account.name + ' - Recent Transactions';
+      drawerTitle.innerText = account.name + ' - Sync History';
       
-      if (!account.lastTransactions || account.lastTransactions.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="3" class="no-tx">No recent transactions synced.</td></tr>';
+      if (!account.history || account.history.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="no-tx">No sync history recorded yet.</td></tr>';
       } else {
-        tableBody.innerHTML = account.lastTransactions.map(tx => {
-          const amtColor = tx.amount >= 0 ? 'tx-credit' : 'tx-debit';
-          const formattedAmt = (tx.amount >= 0 ? '+' : '') + tx.amount.toFixed(2);
+        tableBody.innerHTML = account.history.map(run => {
+          const matchClass = run.balances.match ? 'match-ok' : 'match-mismatch';
+          const date = new Date(run.timestamp);
+          const dateStr = date.toLocaleDateString(undefined, {month: 'short', day: 'numeric'}) + ' ' + 
+                          date.toLocaleTimeString(undefined, {hour: '2-digit', minute:'2-digit'});
           return \`
             <tr>
-              <td class="tx-date">\${tx.date}</td>
-              <td class="tx-payee" title="\${tx.payee || tx.notes || ''}">\${tx.payee || tx.notes || 'Unknown'}</td>
-              <td class="tx-amount \${amtColor}">\${account.balances.currency} \${formattedAmt}</td>
+              <td class="tx-date">\${dateStr}</td>
+              <td class="tx-payee \${matchClass}">
+                \${account.balances.currency} \${run.balances.online.toFixed(2)} / 
+                \${account.balances.currency} \${run.balances.actual.toFixed(2)}
+              </td>
+              <td class="tx-amount tx-credit">\${run.added}</td>
+              <td class="tx-amount tx-updated">\${run.updated}</td>
+              <td class="tx-amount tx-preview">\${run.updatedPreview}</td>
+              <td class="tx-amount \${run.errors > 0 ? 'tx-error' : 'tx-zero'}">\${run.errors}</td>
             </tr>
           \`;
         }).join('');
@@ -615,6 +643,17 @@ export const Sync = (config: AppConfig) => {
         mismatchedBanks: [] as string[],
       };
       
+      const dashboardDir = process.env.DASHBOARD_DATA_DIR || "/app/data";
+      let existingDashboardData: any = null;
+      try {
+        const jsonPath = path.join(dashboardDir, "sync-summary.json");
+        if (fs.existsSync(jsonPath)) {
+          existingDashboardData = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
+        }
+      } catch (e) {
+        // ignore errors
+      }
+
       let dashboardData = {
         lastSyncTime: new Date().toISOString(),
         overall: {
@@ -678,9 +717,25 @@ export const Sync = (config: AppConfig) => {
         
         const isMatch = truelayerBalance?.current === (actualBalance / 100) * sign;
         
-        const sortedTx = [...actualTransactions]
-          .sort((a, b) => b.date.localeCompare(a.date))
-          .slice(0, 20);
+        const existingAcc = existingDashboardData?.accounts?.find(
+          (a: any) => a.actualAccountId === syncConfig.actualAccountId
+        );
+        const existingHistory = existingAcc?.history || [];
+        
+        const currentHistoryEntry = {
+          timestamp: new Date().toISOString(),
+          added: report.added,
+          updated: report.updated,
+          updatedPreview: report.updatedPreview,
+          errors: report.errors,
+          balances: {
+            online: truelayerBalance?.current ?? 0,
+            actual: (actualBalance / 100) * sign,
+            match: isMatch
+          }
+        };
+
+        const accountHistory = [currentHistoryEntry, ...existingHistory].slice(0, 20);
 
         dashboardData.accounts.push({
           name: syncConfig.name,
@@ -696,12 +751,7 @@ export const Sync = (config: AppConfig) => {
             match: isMatch,
             currency: truelayerBalance?.currency || "GBP",
           },
-          lastTransactions: sortedTx.map(t => ({
-            date: t.date,
-            payee: t.payee_name,
-            amount: t.amount / 100,
-            notes: t.notes
-          }))
+          history: accountHistory
         });
 
         if (isMatch)
