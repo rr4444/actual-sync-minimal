@@ -65,12 +65,12 @@ actual:
 
 ## 📊 Monitoring Dashboard
 
-This fork features a built-in, premium **visual observability dashboard** that generates dynamic monitoring assets automatically at the conclusion of every sync cycle.
+This fork features a basic **visual observability dashboard** that generates dynamic monitoring assets automatically at the conclusion of every sync cycle, making it appropriate for contexts where cron/cronjobs are used.
 
 ### Key Features
 * **Real-Time Alignment Status:** Displays bank-specific online balances in comparison with your local Actual Budget ledger balances.
 * **Persistent Sync History:** Maintains a rolling history of the **last 20 sync execution runs** (capturing exact timestamps, balances, and counts of Added, Updated, Preview/Staged, and Error items) saved completely offline inside a persistent volume.
-* **Chronological History Drawer:** A gorgeous, responsive, glassmorphic slide-out panel accessible by clicking any bank card, color-coded to instantly highlight ledger/bank alignment (`🟢 Match` / `🔴 Mismatch`).
+* **Chronological History Drawer:** A responsive, glassmorphic slide-out panel accessible by clicking any bank card, color-coded to instantly highlight ledger/bank alignment (`🟢 Match` / `🔴 Mismatch`).
 * **Zero Host Dependencies:** Rendered static and served by a lightweight Nginx sidecar mounted to a shared PVC.
 
 ### How it works
