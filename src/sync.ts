@@ -21,6 +21,10 @@ export type SyncConfig = {
 };
 
 const generateHtmlDashboard = (data: any): string => {
+  const commitHash = process.env.GIT_COMMIT_HASH || "unknown";
+  const repoLinkText = commitHash !== "unknown" ? `actual-sync-minimal (${commitHash})` : "actual-sync-minimal";
+  const repoLinkUrl = commitHash !== "unknown" ? `https://github.com/rr4444/actual-sync-minimal/commit/${commitHash}` : "https://github.com/rr4444/actual-sync-minimal";
+
   const accountsHtml = data.accounts.map((acc: any, index: number) => {
     const matchStatus = acc.balances.match
       ? `<span class="badge badge-success">Match</span>`
@@ -545,7 +549,7 @@ const generateHtmlDashboard = (data: any): string => {
   </div>
 
   <footer>
-    <a href="https://github.com/rr4444/actual-sync-minimal" target="_blank">actual-sync-minimal</a> &bull; <a href="/actual-sync-minimal/data/sync-summary.json" target="_blank">View raw JSON</a>
+    <a href="${repoLinkUrl}" target="_blank">${repoLinkText}</a> &bull; <a href="/actual-sync-minimal/data/sync-summary.json" target="_blank">View raw JSON</a>
   </footer>
 
   <script>
