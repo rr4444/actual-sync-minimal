@@ -499,7 +499,7 @@ const generateHtmlDashboard = (data: any): string => {
       </div>
       <div class="header-right">
         ${overallStatus}
-        <div class="last-sync">Last updated: ${new Date(data.lastSyncTime).toLocaleString()}</div>
+        <div class="last-sync" id="last-sync-time" data-timestamp="${data.lastSyncTime}">Last updated: ${new Date(data.lastSyncTime).toUTCString()}</div>
       </div>
     </header>
 
@@ -555,6 +555,29 @@ const generateHtmlDashboard = (data: any): string => {
   <script>
     const accountsData = ${JSON.stringify(data.accounts)};
     
+    // Format last updated time in client's local timezone
+    const lastSyncEl = document.getElementById('last-sync-time');
+    if (lastSyncEl) {
+      const timestamp = lastSyncEl.getAttribute('data-timestamp');
+      if (timestamp) {
+        const date = new Date(timestamp);
+        try {
+          const formatted = date.toLocaleString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZoneName: 'short'
+          });
+          lastSyncEl.innerText = 'Last updated: ' + formatted;
+        } catch (e) {
+          lastSyncEl.innerText = 'Last updated: ' + date.toLocaleString();
+        }
+      }
+    }
+    
     function showTransactions(accountIndex) {
       const account = accountsData[accountIndex];
       if (!account) return;
@@ -572,7 +595,7 @@ const generateHtmlDashboard = (data: any): string => {
           const matchClass = run.balances.match ? 'match-ok' : 'match-mismatch';
           const date = new Date(run.timestamp);
           const dateStr = date.toLocaleDateString(undefined, {month: 'short', day: 'numeric'}) + ' ' + 
-                          date.toLocaleTimeString(undefined, {hour: '2-digit', minute:'2-digit'});
+                          date.toLocaleTimeString(undefined, {hour: '2-digit', minute:'2-digit', timeZoneName: 'short'});
           return \`
             <tr>
               <td class="tx-date">\${dateStr}</td>
