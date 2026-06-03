@@ -106,7 +106,7 @@ truelayerCommand
 
 program.command("sync").action(async () => {
   const commitHash = process.env.GIT_COMMIT_HASH || "unknown";
-  console.log(chalk.bold.cyan(`\nStarting actual-sync-minimal (commit: ${commitHash})`));
+  console.log(chalk.bold.cyan(`\nStarting rr4444/actual-sync-minimal (commit: ${commitHash})`));
   const config = await loadConfig();
   const { alignApiDependency } = await import("./align");
   await alignApiDependency(config);

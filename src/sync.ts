@@ -683,6 +683,7 @@ export const Sync = (config: AppConfig) => {
 
       let dashboardData = {
         lastSyncTime: new Date().toISOString(),
+        commitHash: process.env.GIT_COMMIT_HASH || "unknown",
         overall: {
           accountSyncs: 0,
           newTransactions: 0,
