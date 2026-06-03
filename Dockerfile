@@ -1,5 +1,5 @@
 FROM node:20-alpine AS builder
-RUN apk add --no-cache git
+RUN apk add --no-cache git && git config --global --add safe.directory '*'
 WORKDIR /app
 RUN npm install -g pnpm@10.25.0
 
