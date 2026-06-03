@@ -549,7 +549,7 @@ const generateHtmlDashboard = (data: any): string => {
   </div>
 
   <footer>
-    <a href="${repoLinkUrl}" target="_blank">${repoLinkText}</a> &bull; <a href="/actual-sync-minimal/data/sync-summary.json" target="_blank">View raw JSON</a>
+    <a href="${repoLinkUrl}" target="_blank">${repoLinkText}</a> &bull; <a href="/actual-sync-minimal/sync-summary.json" target="_blank">View raw JSON</a>
   </footer>
 
   <script>
