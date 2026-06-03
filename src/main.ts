@@ -11,7 +11,7 @@ import inquirer from "inquirer";
 import * as YAML from "yaml";
 import { loadConfig, createConfig } from "./config";
 
-program.version("1.0.0").description("Actual sync");
+program.version("1.2.1-fork.1").description("Actual sync");
 
 // Config
 program
