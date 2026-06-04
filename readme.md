@@ -2,6 +2,11 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+<img width="979" height="888" alt="image" src="https://github.com/user-attachments/assets/14513c27-6289-4187-be9f-acc70c360a01" />
+<img width="872" height="515" alt="image" src="https://github.com/user-attachments/assets/2c6bfb3e-916d-4b6c-8e5d-c3fcc2dba1b8" />
+
+
+
 > [!IMPORTANT]
 > **IaC & Self-Alignment Architecture**
 > This repository is a specialized fork of `andrewinci/actual-sync` designed to maximize **Infrastructure as Code (IaC) idempotency**, deployment maintainability, and container self-healing.
