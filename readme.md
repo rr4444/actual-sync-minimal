@@ -20,7 +20,7 @@
 
 ---
 
-A minimal command-line tool that automatically syncs bank transactions from various financial providers directly into [Actual Budget](https://actualbudget.org/).
+A minimal command-line tool that automatically syncs bank transactions from various financial providers directly into [Actual Budget](https://actualbudget.org/). Also see [rr4444/actual-ecommerce-noter](https://github.com/rr4444/actual-ecommerce-noter) for e-commerce purchase and refund processing for Amazon, Paypal and eBay, as well as AI auto-classification accounting for split transactions per product in a single order. 
 
 ## ✨ Features
 
