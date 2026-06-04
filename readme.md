@@ -1,4 +1,4 @@
-# Actual Sync (Minimal Fork)
+# Actual Sync (Minimal Fork) for UK and European Banks via TrueLayer
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -9,7 +9,7 @@
 
 > [!IMPORTANT]
 > **IaC & Self-Alignment Architecture**
-> This repository is a specialized fork of `andrewinci/actual-sync` designed to maximize **Infrastructure as Code (IaC) idempotency**, deployment maintainability, and container self-healing.
+> This repository is a specialized fork of `andrewinci/actual-sync` designed to maximize **Infrastructure as Code (IaC) idempotency**, deployment maintainability, and container self-healing. 
 > 
 > In traditional containerized deployments, aligning a client API library with the server version requires host-side scripting, build-time overrides, or manual recompilations. This creates fragile, platform-dependent builds that violate declarative IaC principles.
 > 
