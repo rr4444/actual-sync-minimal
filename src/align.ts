@@ -9,9 +9,30 @@ import { AppConfig } from "./config";
  * installs the target version on the fly if a version mismatch is detected.
  */
 export const alignApiDependency = async (config: AppConfig): Promise<void> => {
-  // 1. Resolve target version: prioritises env variable first, then fallback to config YAML
-  const targetVersion = process.env.ACTUAL_API_VERSION ?? config.actual?.apiVersion;
-  if (!targetVersion) return;
+  // 1. Resolve target version: prioritises env variable first, fallback to config YAML, then dynamic lookup
+  let targetVersion = process.env.ACTUAL_API_VERSION ?? config.actual?.apiVersion;
+
+  if (!targetVersion && config.actual?.url) {
+    const infoUrl = `${config.actual.url.replace(/\/$/, "")}/info`;
+    try {
+      const response = await fetch(infoUrl);
+      if (response.ok) {
+        const data: any = await response.json();
+        const serverVersion = data?.build?.version;
+        if (serverVersion) {
+          console.log(`Resolved target API version dynamically from server info: ${serverVersion}`);
+          targetVersion = serverVersion;
+        }
+      }
+    } catch (err) {
+      console.warn(`Warning: Could not dynamically resolve server version from ${infoUrl}: ${err instanceof Error ? err.message : err}`);
+    }
+  }
+
+  if (!targetVersion) {
+    console.log("No target API version specified or resolved. Skipping alignment.");
+    return;
+  }
 
   const packageJsonPath = path.join(process.cwd(), "node_modules", "@actual-app", "api", "package.json");
   let currentVersion = "";
