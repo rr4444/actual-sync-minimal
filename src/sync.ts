@@ -488,6 +488,143 @@ const generateHtmlDashboard = (data: any): string => {
     footer a:hover {
       text-decoration: underline;
     }
+
+    /* Button Styles */
+    .btn {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+      transition: all 0.2s ease;
+    }
+    .btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #2563eb, #1e40af);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+    }
+    .btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+    .btn:disabled {
+      background: #1f2937;
+      color: #4b5563;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .btn-spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Terminal Console Styles */
+    .terminal {
+      margin-top: 2rem;
+      background: #040507;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 10px 30px rgba(0, 0, 0, 0.5);
+      animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .terminal-header {
+      background: rgba(255, 255, 255, 0.02);
+      padding: 0.75rem 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .terminal-title {
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .terminal-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--text-muted);
+    }
+    .terminal-dot.running {
+      background-color: var(--accent-warning);
+      box-shadow: 0 0 8px var(--accent-warning);
+      animation: pulse 1s infinite alternate;
+    }
+    .terminal-dot.success {
+      background-color: var(--accent-success);
+      box-shadow: 0 0 8px var(--accent-success);
+    }
+    .terminal-dot.failed {
+      background-color: var(--accent-error);
+      box-shadow: 0 0 8px var(--accent-error);
+    }
+    @keyframes pulse {
+      from { opacity: 0.4; }
+      to { opacity: 1; }
+    }
+    .terminal-body {
+      padding: 1.25rem;
+      max-height: 350px;
+      overflow-y: auto;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #d1d5db;
+    }
+    .terminal-body pre {
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .log-info { color: #38bdf8; }
+    .log-success { color: #10b981; }
+    .log-warning { color: #f59e0b; }
+    .log-error { color: #ef4444; font-weight: 600; }
+    .log-process { color: #9ca3af; }
+    .log-highlight {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px dashed rgba(239, 68, 68, 0.3);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      color: #fca5a5;
+      font-family: sans-serif;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      text-align: left;
+    }
+    .log-highlight strong {
+      color: #ef4444;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .log-highlight ol {
+      margin-left: 1.5rem;
+      margin-top: 0.5rem;
+    }
   </style>
 </head>
 <body>
@@ -498,8 +635,16 @@ const generateHtmlDashboard = (data: any): string => {
         <div class="subtitle">Real-time platform-agnostic runtime alignment monitoring</div>
       </div>
       <div class="header-right">
-        ${overallStatus}
-        <div class="last-sync" id="last-sync-time" data-timestamp="${data.lastSyncTime}">Last updated: ${new Date(data.lastSyncTime).toUTCString()}</div>
+        <div style="display: flex; gap: 1.25rem; align-items: center; justify-content: flex-end;">
+          <div style="text-align: right;">
+            ${overallStatus}
+            <div class="last-sync" id="last-sync-time" data-timestamp="${data.lastSyncTime}">Last updated: ${new Date(data.lastSyncTime).toUTCString()}</div>
+          </div>
+          <button id="run-sync-btn" class="btn btn-primary" onclick="triggerSyncRun()" disabled>
+            <span class="btn-spinner" id="sync-spinner" style="display: none;"></span>
+            <span id="sync-btn-text">Run Sync</span>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -547,6 +692,19 @@ const generateHtmlDashboard = (data: any): string => {
       </table>
     </div>
   </div>
+
+    <!-- Logs Terminal -->
+    <div class="terminal" id="sync-terminal" style="display: none; width: 100%;">
+      <div class="terminal-header">
+        <div class="terminal-title">
+          <div class="terminal-dot" id="sync-terminal-dot"></div>
+          <span>Sync Log Output</span>
+        </div>
+      </div>
+      <div class="terminal-body">
+        <pre id="sync-log-content"></pre>
+      </div>
+    </div>
 
   <footer>
     <a href="${repoLinkUrl}" target="_blank">${repoLinkText}</a> &bull; <a href="/actual-sync-minimal/sync-summary.json" target="_blank">View raw JSON</a>
@@ -627,6 +785,142 @@ const generateHtmlDashboard = (data: any): string => {
         closeDrawer();
       }
     });
+
+    // Resolve basePath: handle Traefik subpath prefix if present
+    let basePath = window.location.pathname;
+    if (basePath.endsWith('index.html')) {
+      basePath = basePath.substring(0, basePath.length - 'index.html'.length);
+    }
+    if (!basePath.endsWith('/')) {
+      basePath += '/';
+    }
+
+    const runSyncBtn = document.getElementById('run-sync-btn');
+    const syncSpinner = document.getElementById('sync-spinner');
+    const syncBtnText = document.getElementById('sync-btn-text');
+    const syncTerminal = document.getElementById('sync-terminal');
+    const syncTerminalDot = document.getElementById('sync-terminal-dot');
+    const syncLogContent = document.getElementById('sync-log-content');
+
+    async function checkSyncStatus() {
+      try {
+        const response = await fetch(basePath + 'api/status');
+        const data = await response.json();
+        if (data.enabled) {
+          runSyncBtn.disabled = false;
+        } else {
+          runSyncBtn.disabled = true;
+          console.warn("Sync trigger disabled:", data.error || "Backend status check failed");
+        }
+      } catch (error) {
+        runSyncBtn.disabled = true;
+        console.error("Failed to check sync status:", error);
+      }
+    }
+
+    async function triggerSyncRun() {
+      runSyncBtn.disabled = true;
+      syncSpinner.style.display = 'inline-block';
+      syncBtnText.textContent = 'Running...';
+      
+      syncTerminal.style.display = 'block';
+      syncLogContent.textContent = 'Initializing sync request...\n';
+      syncTerminalDot.className = 'terminal-dot running';
+      syncTerminal.scrollIntoView({ behavior: 'smooth' });
+
+      try {
+        const response = await fetch(basePath + 'api/run', { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success && data.job_id) {
+          syncLogContent.textContent += 'Successfully spawned sync job (' + data.mode + ' Mode): ' + data.job_id + '\nStreaming logs...\n----------------------------------------------------------\n';
+          pollLogs(data.job_id);
+        } else {
+          syncLogContent.textContent += 'Error triggering sync: ' + (data.error || 'Unknown error') + '\n';
+          syncTerminalDot.className = 'terminal-dot failed';
+          resetSyncBtn();
+        }
+      } catch (error) {
+        syncLogContent.textContent += 'Failed to connect to trigger API: ' + error.message + '\n';
+        syncTerminalDot.className = 'terminal-dot failed';
+        resetSyncBtn();
+      }
+    }
+
+    function resetSyncBtn() {
+      runSyncBtn.disabled = false;
+      syncSpinner.style.display = 'none';
+      syncBtnText.textContent = 'Run Sync';
+    }
+
+    function colorizeLogs(text) {
+      if (!text) return '';
+      let escaped = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      // Colorize process markers and status
+      escaped = escaped
+        .replace(/(Starting rr4444\\/actual-sync-minimal.*)/gi, '<span class="log-info">\$1</span>')
+        .replace(/(Sync transactions for.*)/gi, '<span class="log-info"><strong>\$1</strong></span>')
+        .replace(/(Sync result|Sync completed|Successfully aligned)/gi, '<span class="log-success">\$1</span>')
+        .replace(/(⚠️.*|Warning:.*|Update available.*|out-of-sync-migrations)/gi, '<span class="log-warning">\$1</span>')
+        .replace(/(❌.*|Failed.*|Error.*)/gi, '<span class="log-error">\$1</span>')
+        .replace(/(pnpm add @actual-app\\/api.*|npm install.*|Running command:.*)/gi, '<span class="log-process">\$1</span>');
+
+      // Check if out-of-sync-migrations is present and inject troubleshooting warning
+      if (text.indexOf('out-of-sync-migrations') !== -1 || text.indexOf('out_of_sync_migrations') !== -1) {
+        escaped += '\n<div class="log-highlight">' +
+          '<strong>⚠️ DATABASE MIGRATION MISMATCH DETECTED!</strong>' +
+          'Your Actual Budget database has migrations introduced in a newer version of Actual Budget Server than the local @actual-app/api target version.<br><br>' +
+          'To fix this, check your Ansible variables and align versions:<br>' +
+          '<ol>' +
+          '<li>Verify your Ansible variable <code>actual_server_version</code> is correct (currently configured as <code>"26.6.0"</code>).</li>' +
+          '<li>Update the <code>ACTUAL_API_VERSION</code> environment variable in your Kubernetes base manifests (e.g. <code>actual-sync-cronjob.yaml</code> and the dashboard deployment) to match your server version (e.g. <code>"26.6.0"</code>).</li>' +
+          '<li>Re-deploy to let the container automatically align to the matching Actual API version.</li>' +
+          '</ol>' +
+          '</div>';
+      }
+      return escaped;
+    }
+
+    function pollLogs(jobId) {
+      const interval = setInterval(async () => {
+        try {
+          const response = await fetch(basePath + 'api/logs/' + jobId);
+          if (!response.ok) {
+            throw new Error('HTTP status ' + response.status);
+          }
+          const data = await response.json();
+          
+          if (data.logs) {
+            const bodyEl = syncTerminal.querySelector('.terminal-body');
+            syncLogContent.innerHTML = colorizeLogs(data.logs);
+            bodyEl.scrollTop = bodyEl.scrollHeight;
+          }
+          
+          if (data.status === 'success') {
+            clearInterval(interval);
+            syncTerminalDot.className = 'terminal-dot success';
+            resetSyncBtn();
+            setTimeout(() => window.location.reload(), 2000);
+          } else if (data.status === 'failed') {
+            clearInterval(interval);
+            syncTerminalDot.className = 'terminal-dot failed';
+            resetSyncBtn();
+          }
+        } catch (error) {
+          clearInterval(interval);
+          syncLogContent.innerHTML += '\n<span class="log-error">Error fetching logs: ' + error.message + '</span>';
+          syncTerminalDot.className = 'terminal-dot failed';
+          resetSyncBtn();
+        }
+      }, 1500);
+    }
+
+    // Run status check on load
+    checkSyncStatus();
   </script>
 </body>
 </html>`;

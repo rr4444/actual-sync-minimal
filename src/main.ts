@@ -138,4 +138,15 @@ program.command("sync").action(async () => {
     process.exit(1);
   }
 });
+
+program
+  .command("server")
+  .option("-p, --port <number>", "Port to run the server on", "8080")
+  .action(async (options) => {
+    const config = await loadConfig();
+    const { startServer } = await import("./server");
+    const port = parseInt(options.port, 10) || 8080;
+    startServer(config, port);
+  });
+
 program.parse(process.argv);
