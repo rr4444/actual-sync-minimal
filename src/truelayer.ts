@@ -137,7 +137,7 @@ export const Truelayer = (config: TruelayerConfig) => {
   };
 
   const getBalance = async (account: TruelayerBankAccount) => {
-    const data = await truelayerApi<{ current: number }>(
+    const data = await truelayerApi<{ current: number; currency?: string }>(
       account.type === "CARD"
         ? `/data/v1/cards/${account.id}/balance`
         : `/data/v1/accounts/${account.id}/balance`,

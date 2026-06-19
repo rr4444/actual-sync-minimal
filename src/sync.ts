@@ -824,7 +824,7 @@ const generateHtmlDashboard = (data: any): string => {
       syncBtnText.textContent = 'Running...';
       
       syncTerminal.style.display = 'block';
-      syncLogContent.textContent = 'Initializing sync request...\n';
+      syncLogContent.textContent = 'Initializing sync request...\\n';
       syncTerminalDot.className = 'terminal-dot running';
       syncTerminal.scrollIntoView({ behavior: 'smooth' });
 
@@ -833,15 +833,15 @@ const generateHtmlDashboard = (data: any): string => {
         const data = await response.json();
         
         if (data.success && data.job_id) {
-          syncLogContent.textContent += 'Successfully spawned sync job (' + data.mode + ' Mode): ' + data.job_id + '\nStreaming logs...\n----------------------------------------------------------\n';
+          syncLogContent.textContent += 'Successfully spawned sync job (' + data.mode + ' Mode): ' + data.job_id + '\\nStreaming logs...\\n----------------------------------------------------------\\n';
           pollLogs(data.job_id);
         } else {
-          syncLogContent.textContent += 'Error triggering sync: ' + (data.error || 'Unknown error') + '\n';
+          syncLogContent.textContent += 'Error triggering sync: ' + (data.error || 'Unknown error') + '\\n';
           syncTerminalDot.className = 'terminal-dot failed';
           resetSyncBtn();
         }
       } catch (error) {
-        syncLogContent.textContent += 'Failed to connect to trigger API: ' + error.message + '\n';
+        syncLogContent.textContent += 'Failed to connect to trigger API: ' + error.message + '\\n';
         syncTerminalDot.className = 'terminal-dot failed';
         resetSyncBtn();
       }
@@ -871,7 +871,7 @@ const generateHtmlDashboard = (data: any): string => {
 
       // Check if out-of-sync-migrations is present and inject troubleshooting warning
       if (text.indexOf('out-of-sync-migrations') !== -1 || text.indexOf('out_of_sync_migrations') !== -1) {
-        escaped += '\n<div class="log-highlight">' +
+        escaped += '\\n<div class="log-highlight">' +
           '<strong>⚠️ DATABASE MIGRATION MISMATCH DETECTED!</strong>' +
           'Your Actual Budget database has migrations introduced in a newer version of Actual Budget Server than the local @actual-app/api target version.<br><br>' +
           'To fix this, check your Ansible variables and align versions:<br>' +
@@ -912,7 +912,7 @@ const generateHtmlDashboard = (data: any): string => {
           }
         } catch (error) {
           clearInterval(interval);
-          syncLogContent.innerHTML += '\n<span class="log-error">Error fetching logs: ' + error.message + '</span>';
+          syncLogContent.innerHTML += '\\n<span class="log-error">Error fetching logs: ' + error.message + '</span>';
           syncTerminalDot.className = 'terminal-dot failed';
           resetSyncBtn();
         }
