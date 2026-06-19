@@ -20,7 +20,7 @@ export type SyncConfig = {
   }[];
 };
 
-const generateHtmlDashboard = (data: any): string => {
+export const generateHtmlDashboard = (data: any): string => {
   const commitHash = process.env.GIT_COMMIT_HASH || "unknown";
   const repoLinkText = commitHash !== "unknown" ? `actual-sync-minimal (${commitHash})` : "actual-sync-minimal";
   const repoLinkUrl = commitHash !== "unknown" ? `https://github.com/rr4444/actual-sync-minimal/commit/${commitHash}` : "https://github.com/rr4444/actual-sync-minimal";

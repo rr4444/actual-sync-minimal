@@ -5,6 +5,7 @@ import * as path from "path";
 import { spawn } from "child_process";
 import chalk from "chalk";
 import { AppConfig } from "./config";
+import { generateHtmlDashboard } from "./sync";
 
 // Interface for Job Info
 interface JobInfo {
@@ -128,6 +129,18 @@ export const startServer = (config: AppConfig, port: number = 8080) => {
 
     // --- Serve static files ---
     if (pathname === "/" || pathname === "/index.html") {
+      const summaryPath = path.join(dashboardDir, "sync-summary.json");
+      if (fs.existsSync(summaryPath)) {
+        try {
+          const summaryData = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
+          res.writeHead(200, { "Content-Type": "text/html" });
+          res.end(generateHtmlDashboard(summaryData));
+          return;
+        } catch (err: any) {
+          console.error("Failed to dynamically generate dashboard:", err);
+        }
+      }
+
       const filePath = path.join(dashboardDir, "index.html");
       if (fs.existsSync(filePath)) {
         res.writeHead(200, { "Content-Type": "text/html" });
